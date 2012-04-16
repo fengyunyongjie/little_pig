@@ -225,7 +225,7 @@ enum {
         armJointDef.motorSpeed=-10;//-1260;
         armJointDef.lowerAngle=CC_DEGREES_TO_RADIANS(9);
         armJointDef.upperAngle=CC_DEGREES_TO_RADIANS(75);
-        armJointDef.maxMotorTorque=4800;
+        armJointDef.maxMotorTorque=700; //4800;
         
         armJoint=(b2RevoluteJoint*)world->CreateJoint(&armJointDef);
 		[self performSelector:@selector(resetGame) withObject:nil afterDelay:0.5f];
@@ -315,7 +315,32 @@ enum {
 		}	
 	}
     
+    //Arm is being released
+    if(releasingArm && bulletJoint)
+    {
+        //check if the arm reached the end so we can return the limits
+        if(armJoint->GetJointAngle()<=CC_DEGREES_TO_RADIANS(10)){
+            releasingArm=NO;
+            
+            //Destory joint so the bullet will be free
+            world->DestroyJoint(bulletJoint);
+            bulletJoint=nil;
+        }
+    }
     
+    //Bullet is moving 
+    if(bulletBody && bulletJoint==nil){
+        b2Vec2 position=bulletBody->GetPosition();
+        CGPoint myPosition=self.position;
+        CGSize screenSize=[CCDirector sharedDirector].winSize;
+        
+        //Move the camera
+        
+        if(position.x>screenSize.width/2.0f/PTM_RATIO){
+            myPosition.x=-MIN(screenSize.width*2.0f-screenSize.width, position.x *PTM_RATIO-screenSize.width/2.0f);
+            self.position=myPosition;
+        }
+    }
 }
 
 // on "dealloc" you need to release all your retained objects
