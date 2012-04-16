@@ -97,9 +97,127 @@ enum {
     }
     return NO;
 }
+
+-(void)createTarget:(NSString *)imageName atPosition:(CGPoint)position rotation:(CGFloat)rotation isCircle:(BOOL)isCircle isStatic:(BOOL)isStatic isEnemy:(BOOL)isEnemy{
+    
+    CCSprite *sprite=[CCSprite spriteWithFile:imageName];
+    [self addChild:sprite z:1];
+    
+    b2BodyDef bodyDef;
+    bodyDef.type=isStatic ? b2_staticBody : b2_dynamicBody;
+    bodyDef.position.Set((position.x+sprite.contentSize.width/2.0f)/PTM_RATIO, (position.y+sprite.contentSize.height/2.0f)/PTM_RATIO);
+    bodyDef.angle=CC_DEGREES_TO_RADIANS(rotation);
+    bodyDef.userData=sprite;
+    b2Body *body=world->CreateBody(&bodyDef);
+    
+    b2FixtureDef boxDef;
+    if(isCircle){
+        b2CircleShape circle;
+        circle.m_radius=sprite.contentSize.width/2.0f/PTM_RATIO;
+        boxDef.shape=&circle;
+    }else {
+        b2PolygonShape box;
+        box.SetAsBox(sprite.contentSize.width/2.0f/PTM_RATIO, sprite.contentSize.height/2.0f/PTM_RATIO);
+        boxDef.shape=&box;
+    }
+    if(isEnemy){
+        boxDef.userData=(void*)1;
+        [enemies addObject:[NSValue valueWithPointer:body]];
+    }
+    boxDef.density=0.5f;
+    body->CreateFixture(&boxDef);
+    [targets addObject:[NSValue valueWithPointer:body]];
+    
+}
+-(void)createTargets{
+    [targets release];
+    [enemies release];
+    
+    targets=[[NSMutableSet alloc] init];
+    enemies=[[NSMutableSet alloc] init];
+    
+    //First block
+    
+    [self createTarget:@"brick_2.png" atPosition:CGPointMake(675.0, FLOOR_HEIGHT) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_1.png"atPosition:CGPointMake(741.0, FLOOR_HEIGHT) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_1.png"atPosition:CGPointMake(741.0, FLOOR_HEIGHT+23.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_3.png"atPosition:CGPointMake(672.0, FLOOR_HEIGHT+46.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_1.png"atPosition:CGPointMake(707.0, FLOOR_HEIGHT+58.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_1.png"atPosition:CGPointMake(707.0, FLOOR_HEIGHT+81.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    
+    [self createTarget:@"head_dog.png"atPosition:CGPointMake(702.0, FLOOR_HEIGHT) rotation:0.0f isCircle:YES isStatic:NO isEnemy:YES];
+    [self createTarget:@"head_cat.png"atPosition:CGPointMake(680.0, FLOOR_HEIGHT+58.0f) rotation:0.0f isCircle:YES isStatic:NO isEnemy:YES];
+    [self createTarget:@"head_dog.png"atPosition:CGPointMake(740.0, FLOOR_HEIGHT+58.0f) rotation:0.0f isCircle:YES isStatic:NO isEnemy:YES];
+    
+    //2 bricks at the right of the first block
+    [self createTarget:@"brick_2.png" atPosition:CGPointMake(770.0, FLOOR_HEIGHT) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_2.png" atPosition:CGPointMake(770.0, FLOOR_HEIGHT+46.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    
+    // The dog between the blocks
+    [self createTarget:@"head_dog.png"atPosition:CGPointMake(830.0, FLOOR_HEIGHT) rotation:0.0f isCircle:YES isStatic:NO isEnemy:YES];
+    
+    // Second block
+    [self createTarget:@"brick_platform.png" atPosition:CGPointMake(839.0, FLOOR_HEIGHT) rotation:0.0f isCircle:NO isStatic:YES isEnemy:NO];
+    [self createTarget:@"brick_2.png" atPosition:CGPointMake(854.0, FLOOR_HEIGHT+28.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_2.png" atPosition:CGPointMake(854.0, FLOOR_HEIGHT+28.0f+46.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"head_cat.png"atPosition:CGPointMake(881.0, FLOOR_HEIGHT+28.0f) rotation:0.0f isCircle:YES isStatic:NO isEnemy:YES];
+    [self createTarget:@"brick_2.png"atPosition:CGPointMake(909.0, FLOOR_HEIGHT+28.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_1.png"atPosition:CGPointMake(909.0, FLOOR_HEIGHT+28.0f+46.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_1.png"atPosition:CGPointMake(909.0, FLOOR_HEIGHT+28.0f+46.0f+23.0f) rotation:0.0f isCircle:NO isStatic:NO isEnemy:NO];
+    [self createTarget:@"brick_2.png"atPosition:CGPointMake(882.0, FLOOR_HEIGHT+108.0f) rotation:90.0f isCircle:NO isStatic:NO isEnemy:NO];
+}
+
+-(void) resetBullet{
+    if([enemies count]==0){
+        //game over
+        
+        [self performSelector:@selector(resetGame) withObject:nil afterDelay:2.0f];
+        
+    }else if ([self attachBullet]) {
+        [self runAction:[CCMoveTo actionWithDuration:2.0f position:CGPointZero]];
+    }else {
+        //we can reset the whole scene here
+
+        [self performSelector:@selector(resetGame) withObject:nil afterDelay:2.0f];
+    }
+}
+
 -(void)resetGame{
+    
+    if(bullets){
+        
+        for (NSValue *bulletPointer in bullets) {
+            b2Body *bullet=(b2Body*)[bulletPointer pointerValue];
+            CCNode *node=(CCNode *)bullet->GetUserData();
+            [self removeChild:node cleanup:YES];
+            
+            world->DestroyBody(bullet);
+        }
+        [bullets release];
+        bullets=nil;
+    }
+    
+    //Previous targets cleanup
+    
+    if(targets){
+        for (NSValue *bodyValue in targets) {
+            b2Body *body=(b2Body*)[bodyValue pointerValue];
+            CCNode *node=(CCNode*)body->GetUserData();
+            [self removeChild:node cleanup:YES];
+            
+            world->DestroyBody(body);
+        }
+        [targets release];
+        [enemies release];
+        targets=nil;
+        enemies=nil;
+    }
+    
     [self createBullets:4];
-    [self attachBullet];
+    //[self attachBullet];
+    [self createTargets];
+    
+    [self runAction:[CCSequence actions:[CCMoveTo actionWithDuration:1.5f position:CGPointMake(-480.0f, 0.0f)],[CCCallFuncN actionWithTarget:self selector:@selector(attachBullet)],[CCDelayTime actionWithDuration:1.0f],[CCMoveTo actionWithDuration:1.5f position:CGPointZero], nil]];
 }
 // on "init" you need to initialize your instance
 -(id) init
@@ -180,7 +298,7 @@ enum {
 		b2PolygonShape groundBox;		
 		
 		// bottom
-		groundBox.SetAsEdge(b2Vec2(0,FLOOR_HEIGHT/PTM_RATIO), b2Vec2(screenSize.width*2.0f/PTM_RATIO,0));
+		groundBox.SetAsEdge(b2Vec2(0,FLOOR_HEIGHT/PTM_RATIO), b2Vec2(screenSize.width*2.0f/PTM_RATIO,FLOOR_HEIGHT/PTM_RATIO));
 		groundBody->CreateFixture(&groundBox,0);
 		
 		// top
@@ -192,8 +310,8 @@ enum {
 		groundBody->CreateFixture(&groundBox,0);
 		
 		// right
-		groundBox.SetAsEdge(b2Vec2(screenSize.width*2.0f/PTM_RATIO,screenSize.height/PTM_RATIO), b2Vec2(screenSize.width*2.0f/PTM_RATIO,0));
-		groundBody->CreateFixture(&groundBox,0);
+		//groundBox.SetAsEdge(b2Vec2(screenSize.width*2.0f/PTM_RATIO,screenSize.height/PTM_RATIO), b2Vec2(screenSize.width*2.0f/PTM_RATIO,0));
+		//groundBody->CreateFixture(&groundBox,0);
         
         
         //Create the catapult's arm
@@ -228,6 +346,11 @@ enum {
         armJointDef.maxMotorTorque=700; //4800;
         
         armJoint=(b2RevoluteJoint*)world->CreateJoint(&armJointDef);
+        
+        
+        contactListener=new MyContactListener();
+        world->SetContactListener(contactListener);
+        
 		[self performSelector:@selector(resetGame) withObject:nil afterDelay:0.5f];
 		[self schedule: @selector(tick:)];
 	}
@@ -325,6 +448,7 @@ enum {
             //Destory joint so the bullet will be free
             world->DestroyJoint(bulletJoint);
             bulletJoint=nil;
+            [self performSelector:@selector(resetBullet) withObject:nil afterDelay:5.0f];
         }
     }
     
@@ -341,6 +465,36 @@ enum {
             self.position=myPosition;
         }
     }
+    
+    //check for impacts
+    
+    std::set<b2Body*> ::iterator pos;
+    for (pos=contactListener->contacts.begin(); pos!=contactListener->contacts.end(); ++pos) {
+        b2Body *body=*pos;
+        
+        CCNode *contactNode=(CCNode*)body->GetUserData();
+        
+        CGPoint position =contactNode.position;
+        [self removeChild:contactNode cleanup:YES];
+        
+        world->DestroyBody(body);
+        
+        [targets removeObject:[NSValue valueWithPointer:body]];
+        [enemies removeObject:[NSValue valueWithPointer:body]];
+        
+        CCParticleSun *explosion=[[CCParticleSun alloc]initWithTotalParticles:200];
+        explosion.autoRemoveOnFinish=YES;
+        explosion.startSize=10.0f;
+        explosion.speed=70.0f;
+        explosion.anchorPoint=ccp(0.5f,0.5f);
+        explosion.position=position;
+        explosion.duration=1.0f;
+        [self addChild:explosion z:11];
+        [explosion release];
+        
+    }
+    //remove everything from the set
+    contactListener->contacts.clear();
 }
 
 // on "dealloc" you need to release all your retained objects
@@ -353,6 +507,8 @@ enum {
 	delete m_debugDraw;
     
     [bullets release];
+    [targets release];
+    [enemies release];
 
 	// don't forget to call "super dealloc"
 	[super dealloc];

@@ -189,6 +189,7 @@
 		18451C3F153B056A00F7BBAE /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18451C3E153B056A00F7BBAE /* RootViewController.m */; };
 		18451C42153B056A00F7BBAE /* HelloWorldLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18451C41153B056A00F7BBAE /* HelloWorldLayer.mm */; };
 		18451C45153B056A00F7BBAE /* GLES-Render.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18451C44153B056A00F7BBAE /* GLES-Render.mm */; };
+		34051FDB153BF0AC001E36D1 /* MyContactListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34051FDA153BF0AC001E36D1 /* MyContactListener.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -533,6 +534,8 @@
 		18451C43153B056A00F7BBAE /* GLES-Render.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GLES-Render.h"; sourceTree = "<group>"; };
 		18451C44153B056A00F7BBAE /* GLES-Render.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = "GLES-Render.mm"; sourceTree = "<group>"; };
 		18451C46153B056A00F7BBAE /* GameConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameConfig.h; sourceTree = "<group>"; };
+		34051FDA153BF0AC001E36D1 /* MyContactListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MyContactListener.cpp; sourceTree = "<group>"; };
+		34051FDD153BF0E0001E36D1 /* MyContactListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyContactListener.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -636,6 +639,8 @@
 				18451C43153B056A00F7BBAE /* GLES-Render.h */,
 				18451C44153B056A00F7BBAE /* GLES-Render.mm */,
 				18451C46153B056A00F7BBAE /* GameConfig.h */,
+				34051FDD153BF0E0001E36D1 /* MyContactListener.h */,
+				34051FDA153BF0AC001E36D1 /* MyContactListener.cpp */,
 				18451A76153B056100F7BBAE /* Resources */,
 				18451A8A153B056200F7BBAE /* libs */,
 				18451C36153B056A00F7BBAE /* Supporting Files */,
@@ -1335,6 +1340,7 @@
 				18451C3F153B056A00F7BBAE /* RootViewController.m in Sources */,
 				18451C42153B056A00F7BBAE /* HelloWorldLayer.mm in Sources */,
 				18451C45153B056A00F7BBAE /* GLES-Render.mm in Sources */,
+				34051FDB153BF0AC001E36D1 /* MyContactListener.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
